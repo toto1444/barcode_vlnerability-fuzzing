@@ -15,15 +15,15 @@
 const int ledPin =  13;      // LED 꽂혀있는 핀번호 
 // 변수 변경:
 int delaybase = 25;
-//100 펜리더는 100이 가장 좋은것 같은데?
-//20 은 코드 39랑 레이저 리더에 좋음.
+//100 펜리더는 100이 가장 좋은것 같은데? 아마도.
+//20 또는 보다 큰값은 code 39와 레이저 리더에 잘인식됨.
 
 
-#define STR_LENGTH 500 //500 should give us 100 Code 128 characters and 50 Code 39
+#define STR_LENGTH 500 //500, Code 128 에는 100을 Code 39 에는 50
 char BarcodeBuf[STR_LENGTH]="";
 //char RevBarcodeBuf[STR_LENGTH]="";
 
-//모든 코드 39는 1을 공백으로 하는듯
+//모든 코드 39는 버퍼가 1이라서 공백으로 종료함.
 char* code39bars[]={
   "1113313111", "3113111131", "1133111131", "3133111111", "1113311131", "3113311111", "1133311111",
   "1113113131", "3113113111", "1133113111", "3111131131", "1131131131", "3131131111", "1111331131",
@@ -52,39 +52,39 @@ char* code128bars[]={
 void setup() {
   pinMode(ledPin, OUTPUT);
   for (int thispin=3; thispin <=10;thispin++){
-    pinMode(thispin, INPUT_PULLUP); // Se them high by default
+    pinMode(thispin, INPUT_PULLUP); // 기본적으로 높음.
   }
 }
 
 void loop()
 {
 
-  if (!digitalRead(3)){ //Uber simple test sting
+  if (!digitalRead(3)){ //가장 간단한 테스트문자열
     SendUSingDIPChoice("abc123");
   }
-  if (!digitalRead(4)){ //My old Shmoocon 2010 barcode
+  if (!digitalRead(4)){ //irongeek 님의 오래된 Shmoocon 2010 바코드
     SendUSingDIPChoice("e7e7f559-ce13-fd7f-baf0-9b4908dd1c73");
   }
-  if (!digitalRead(5)){ //Simple XSS attack, who sanitizes barcode input?
+  if (!digitalRead(5)){ //간단한 XSS 공격, 누가 바코드인데 정상적인 코드처럼 보이게 만들어서 힘들게 입력해?
     SendUSingDIPChoice("<script>alert(\"AhHyeon Was Here\")</script>");
   }
-  if (!digitalRead(6)){ //Simle SQL Injection attack via barcode
+  if (!digitalRead(6)){ //간단한 바코드 SQL 인젝션공격
     SendUSingDIPChoice("' or 1=1 -- ");
   }
-  if (!digitalRead(7)){//The EICAR test string, to see if AV freaks out
+  if (!digitalRead(7)){//백신이 반응을 보이는지 테스트할 EICAR 문자열 
     SendUSingDIPChoice("X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*");
   }
   if (!digitalRead(8)){
-    Code128StringSend("TRY TO PASTE v",103); //v in 128a should be a Ctrl+V
+    Code128StringSend("TRY TO PASTE v",103); //v 는 128a 에서 Ctrl+V 코드임.
   }
-  if (!digitalRead(9)){//Send some odd stuff, see what key press it is interpreted as
+  if (!digitalRead(9)){//몇몇 오래된 장비에 보내서 어떤 키입력으로 들어가는지 판단
     int points[]={
       64,65,66,67,68,69,70,71,72,73,74,75,75,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95        };
     Code128IntArrSend(points,  103,  31);
   }
 
 
-  //Uncomment code below to try alternating timings
+  //아래 코드로 타이밍 작동 하는지 테스트
   /*
  char buf[6];
    Code128StringSend(strcat(TestString, itoa(delaybase, buf, 10)));
@@ -96,16 +96,17 @@ void loop()
    */
 }
 void SendUSingDIPChoice(char *SomeString) {
-  if (!digitalRead(10)) { //Default to sending in Code 128b
+  if (!digitalRead(10)) { //Code 128b 을 기본으로 보냄
     Code39StringSend(SomeString);
   }
   else {
-    Code128StringSend(SomeString, 104); //104 means 128b, 103 is a, 105 is c
+    Code128StringSend(SomeString, 104); //104 는 128b 을 의미함, 103 은 a, 105 는 c
   }
 }
 
-//Based on stuff from http://www.codeguru.com/forum/showthread.php?t=303185
-//not used yet
+//http://www.codeguru.com/forum/showthread.php?t=303185 와
+//http://www.irongeek.com/i.php?page=security/barcode-flashing-led-fuzzer-bruteforcer-injector 를 기반으로 작성함.
+//아직 사용안함
 char* rev(char* str)
 {
   int end= strlen(str)-1;
@@ -122,7 +123,7 @@ char* rev(char* str)
 }
 
 
-int ASCIItoCode128Point(char Cvalue)// Converts the ASCII value to it's place in the Code 128 chart
+int ASCIItoCode128Point(char Cvalue)// ASCII 코드 값을 코드 128 차트에 있는 값으로 변환
 {
   int Ivalue=(int)Cvalue;
   if  (Ivalue == 32){
@@ -134,7 +135,7 @@ int ASCIItoCode128Point(char Cvalue)// Converts the ASCII value to it's place in
   if (Ivalue >= 145){
     return Ivalue-50;
   }
-  if (Ivalue <= 31){ //Not used yet, but will be needed for Code 128a
+  if (Ivalue <= 31){ //아직 사용안함 Code 128a 가 필요할때 바로 사용할수 있을지도....?
     return Ivalue+64;
   }
 
