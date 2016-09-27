@@ -7,7 +7,7 @@
  Thanks to Professor Lee. for some tips on idea
  
  This code will maybe not work if your barcode scanner is optical,
- only pens and laser barcode readers should work.
+ maybe only pens and laser barcode readers work.
  
  You may have to playing with the timing (delay base).
  */
@@ -48,3 +48,94 @@ char* code128bars[]={
   "214121", "412121", "111143", "111341", "131141", "114113", "114311", "411113", "411311",
   "113141", "114131", "311141", "411131", "211412", "211214", "211232", "2331112"};
 
+
+void setup() {
+  pinMode(ledPin, OUTPUT);
+  for (int thispin=3; thispin <=10;thispin++){
+    pinMode(thispin, INPUT_PULLUP); // Se them high by default
+  }
+}
+
+void loop()
+{
+
+  if (!digitalRead(3)){ //Uber simple test sting
+    SendUSingDIPChoice("abc123");
+  }
+  if (!digitalRead(4)){ //My old Shmoocon 2010 barcode
+    SendUSingDIPChoice("e7e7f559-ce13-fd7f-baf0-9b4908dd1c73");
+  }
+  if (!digitalRead(5)){ //Simple XSS attack, who sanitizes barcode input?
+    SendUSingDIPChoice("<script>alert(\"AhHyeon Was Here\")</script>");
+  }
+  if (!digitalRead(6)){ //Simle SQL Injection attack via barcode
+    SendUSingDIPChoice("' or 1=1 -- ");
+  }
+  if (!digitalRead(7)){//The EICAR test string, to see if AV freaks out
+    SendUSingDIPChoice("X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*");
+  }
+  if (!digitalRead(8)){
+    Code128StringSend("TRY TO PASTE v",103); //v in 128a should be a Ctrl+V
+  }
+  if (!digitalRead(9)){//Send some odd stuff, see what key press it is interpreted as
+    int points[]={
+      64,65,66,67,68,69,70,71,72,73,74,75,75,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95        };
+    Code128IntArrSend(points,  103,  31);
+  }
+
+
+  //Uncomment code below to try alternating timings
+  /*
+ char buf[6];
+   Code128StringSend(strcat(TestString, itoa(delaybase, buf, 10)));
+
+   delaybase++;
+   if (delaybase>1000){
+   delaybase=1;
+   }
+   */
+}
+void SendUSingDIPChoice(char *SomeString) {
+  if (!digitalRead(10)) { //Default to sending in Code 128b
+    Code39StringSend(SomeString);
+  }
+  else {
+    Code128StringSend(SomeString, 104); //104 means 128b, 103 is a, 105 is c
+  }
+}
+
+//Based on stuff from http://www.codeguru.com/forum/showthread.php?t=303185
+//not used yet
+char* rev(char* str)
+{
+  int end= strlen(str)-1;
+  int start = 0;
+  while( start<end )
+  {
+    str[start] ^= str[end];
+    str[end] ^=   str[start];
+    str[start]^= str[end];
+    ++start;
+    --end;
+  }
+  return str;
+}
+
+
+int ASCIItoCode128Point(char Cvalue)// Converts the ASCII value to it's place in the Code 128 chart
+{
+  int Ivalue=(int)Cvalue;
+  if  (Ivalue == 32){
+    return 0;
+  }
+  if (Ivalue >= 33 && Ivalue <= 126){
+    return Ivalue-32;
+  }
+  if (Ivalue >= 145){
+    return Ivalue-50;
+  }
+  if (Ivalue <= 31){ //Not used yet, but will be needed for Code 128a
+    return Ivalue+64;
+  }
+
+}
