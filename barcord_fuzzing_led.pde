@@ -140,3 +140,44 @@ int ASCIItoCode128Point(char Cvalue)// ASCII 코드 값을 코드 128 차트에 
   }
 
 }
+
+
+int ASCIItoCode39Point(char Cvalue)// ASCII 값을 Code 39 차트에 있는 값으로 변환
+{
+  int Ivalue=(int)Cvalue;
+  if (Ivalue >= 48 && Ivalue <= 57){
+    return Ivalue-48;
+  }
+  if (Ivalue >= 65 && Ivalue <= 90){
+    return Ivalue-55;
+  }
+  if (Ivalue >= 97 && Ivalue <= 122){
+    return Ivalue-87;
+  }
+  switch (Cvalue) {
+  case '-':
+    return 36;
+    break;
+  case '.':
+    return 37;
+    break;
+  case ' ':
+    return 38;
+    break;
+  case '$':
+    return 39;
+    break;
+  case '/':
+    return 40;
+    break;
+  case '+':
+    return 41;
+    break;
+  case '%':
+    return 42;
+    break;
+  case '*':
+    return 43;
+    break;
+  }
+}
