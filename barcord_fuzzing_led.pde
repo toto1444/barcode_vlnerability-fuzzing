@@ -181,3 +181,14 @@ int ASCIItoCode39Point(char Cvalue)// ASCII 값을 Code 39 차트에 있는 값�
     break;
   }
 }
+
+
+void UpperCase(char *SomeString) //사용하진 않지만 할수도 있는 code 39 부분
+{
+  int i;
+  for (i = 0; SomeString[i]!='\0'; i++) {
+    if  (SomeString[i] >= 97 && SomeString[i] <= 122){
+      SomeString[i]=SomeString[i]-32;
+    }
+  }
+}
