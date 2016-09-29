@@ -19,7 +19,7 @@ int delaybase = 25;
 //20 또는 보다 큰값이 code 39와 레이저 리더에 잘인식될듯.....
 
 
-#define STR_LENGTH 500 //500, Code 128 에는 100을 Code 39 에는 50
+#define STR_LENGTH 100 //500, Code 128 에는 100을 Code 39 에는 50
 char BarcodeBuf[STR_LENGTH]="";
 //char RevBarcodeBuf[STR_LENGTH]="";
 
@@ -51,9 +51,9 @@ char* code128bars[]={
 
 void setup() {
   pinMode(ledPin, OUTPUT);
-  for (int thispin=3; thispin <=10;thispin++){
-    pinMode(thispin, INPUT_PULLUP); // 기본적으로 높음.
-  }
+  //for (int thispin=3; thispin <=10;thispin++){
+  //  pinMode(thispin, INPUT_PULLUP); // 기본적으로 높음.
+  //}
 }
 
 void loop()
@@ -191,4 +191,125 @@ void UpperCase(char *SomeString) //사용하진 않지만 할수도 있는 code 
       SomeString[i]=SomeString[i]-32;
     }
   }
+}
+
+void Code128StringSend(char *SomeString, int ver) //문자열 보냄. Ver 의  103 은  128a, 104 는 128b 그리고 105 는 128c
+//Current code does not let you mix Code 128 versions
+{
+  int i;
+  int CheckSum = Code128CheckSum(SomeString, ver); //104 means Code 128B
+  BarcodeBuf[0] = '\0';
+  //Turn on LED to read as white space
+  digitalWrite(ledPin, LOW);
+  delayMicroseconds(delaybase*100);
+
+  strcat(BarcodeBuf, code128bars[ver]);//Code 128B start
+  for (i = 0; SomeString[i]!='\0'; i++) {
+    strcat(BarcodeBuf, code128bars[ASCIItoCode128Point(SomeString[i])]);
+  }
+  strcat(BarcodeBuf, code128bars[CheckSum]);  //Checksum
+  strcat(BarcodeBuf, "2331112"); //Code 128 end
+  FlashSeq(BarcodeBuf);
+  //Serial.println(BarcodeBuf);
+  //Turn on LED to read as white space
+  digitalWrite(ledPin, LOW);
+  delayMicroseconds(delaybase*25);
+
+
+  FlashSeq(rev(BarcodeBuf)); //Playing it backard helps reliability
+  //Turn on LED to read as white space
+  digitalWrite(ledPin, LOW);
+  delayMicroseconds(delaybase*100);
+  //Serial.println(BarcodeBuf);
+}
+
+void Code128IntArrSend(int *SomeIntArr, int ver, int arsize) //Using this for some odd characters
+//Send the string. Ver should be 103 for 128a, 104 for 128b and 105 for 128c
+//Current code does not let you mix Code 128 versions
+{
+  int i;
+  int CheckSum = Code128CheckSumInt(SomeIntArr, ver, arsize); //104 means Code 128B
+  BarcodeBuf[0] = '\0';
+  //Turn on LED to read as white space
+  digitalWrite(ledPin, LOW);
+  delayMicroseconds(delaybase*100);
+
+  strcat(BarcodeBuf, code128bars[ver]);//Code 128B start
+  for (i = 0; i<arsize; i++) {
+    strcat(BarcodeBuf, code128bars[SomeIntArr[i]]);
+  }
+  strcat(BarcodeBuf, code128bars[CheckSum]);  //Checksum
+  strcat(BarcodeBuf, "2331112"); //Code 128 end
+  FlashSeq(BarcodeBuf);
+
+  //Serial.println(BarcodeBuf);
+  //Turn on LED to read as white space
+  digitalWrite(ledPin, LOW);
+  delayMicroseconds(delaybase*25);
+
+  FlashSeq(rev(BarcodeBuf)); //Playing it backard helps reliability
+  //Turn on LED to read as white space
+  digitalWrite(ledPin, LOW);
+  delayMicroseconds(delaybase*100);
+  //Serial.println(BarcodeBuf);
+}
+
+int Code128CheckSum(char *SomeString, int variant)
+{
+  int i;
+  long PointSum=variant;
+  for (i = 0; SomeString[i]!='\0'; i++) {
+    PointSum = PointSum + ((i+1)*ASCIItoCode128Point(SomeString[i]));
+  }
+  return PointSum%103;
+}
+
+int Code128CheckSumInt(int *SomeIntArr, int variant, int arsize)
+{
+  int i;
+  long PointSum=variant;
+  for (i = 0;  i<arsize; i++) {
+    PointSum = PointSum + ((i+1)*SomeIntArr[i]);
+  }
+  return PointSum%103;
+}
+
+void Code39StringSend(char *SomeString)
+{
+  int i;
+  BarcodeBuf[0] = '\0';
+  //Turn on LED to read as white space
+  digitalWrite(ledPin, LOW);
+  delayMicroseconds(delaybase*100);
+
+  strcat(BarcodeBuf, "1311313111");//Code 39 start
+  for (i = 0; SomeString[i]!='\0'; i++) {
+    strcat(BarcodeBuf, code39bars[ASCIItoCode39Point(SomeString[i])]);
+  }
+  strcat(BarcodeBuf, "1311313111"); //Code 39 end
+  FlashSeq(BarcodeBuf);
+
+  //Turn on LED to read as white space
+  digitalWrite(ledPin, LOW);
+  delayMicroseconds(delaybase*25);
+
+  //Serial.println(BarcodeBuf);
+  FlashSeq(rev(BarcodeBuf));//Playing it backard helps reliability
+
+  //Turn on LED to read as white space
+  digitalWrite(ledPin, LOW);
+  delayMicroseconds(delaybase*100);
+  //Serial.println(BarcodeBuf);
+}
+
+void FlashSeq(char *FlashMe) //I do the real work, and switch between black and white areas
+{
+  int i;
+  int B = HIGH;
+  for (i = 0; FlashMe[i] != '\0'; i++) {
+    digitalWrite(ledPin, B);
+    delayMicroseconds(delaybase*(((int)FlashMe[i])-48));
+    B=!B;
+  }
+
 }
