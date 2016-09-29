@@ -70,8 +70,8 @@ void loop()
     
     SendUSingDIPChoice("abc123");
   }
-  if (sr == "4"){ //irongeek 님의 오래된 Shmoocon 2010 바코드
-    SendUSingDIPChoice("e7e7f559-ce13-fd7f-baf0-9b4908dd1c73");
+  if (sr == "4"){ //빈칸.....
+    SendUSingDIPChoice("ummm.....");
   }
   if (sr == "5"){ //간단한 XSS 공격, 누가 바코드인데 정상적인 코드처럼 보이게 만들어서 힘들게 입력해?
     SendUSingDIPChoice("<script>alert(\"AhHyeon Was Here\")</script>");
