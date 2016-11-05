@@ -22,8 +22,8 @@ public class EAN13CodeBuilder {
     }
 
     ////////////////////////////////////////////////////////////////
-    // this method generates EAN 13 control number ans returns full
-    // string to encode
+    // 이 방법은 EAN 13 관리 코드를 전체 반환 함
+    // 문자열을 인코딩
 
     private String getFullCode()
     {
@@ -71,8 +71,8 @@ public class EAN13CodeBuilder {
     }
 
     //////////////////////////////////////////////
-    // this method generates EAN 13 encoded string
-    // algorithm can be found at http://en.wikipedia.org/wiki/EAN-13
+    // EAN 13 으로 문자열 인코딩
+    // 알고리즘은 여기서 찾음. http://en.wikipedia.org/wiki/EAN-13
 
     private String createEAN13Code(String rawCode)
     {
